@@ -1,4 +1,4 @@
-readme_content = """# 📦 Supply Chain & Inventory Tracker
+"""# 📦 Supply Chain & Inventory Tracker
 
 A robust, web-based Supply Chain and Inventory Management System designed to track products, manage warehouse capacities, handle supplier relations, process purchase orders, and monitor real-time stock movements. 
 
