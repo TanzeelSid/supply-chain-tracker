@@ -1,4 +1,4 @@
-"""# 📦 Supply Chain & Inventory Tracker
+## 📦 Supply Chain & Inventory Tracker
 
 A robust, web-based Supply Chain and Inventory Management System designed to track products, manage warehouse capacities, handle supplier relations, process purchase orders, and monitor real-time stock movements. 
 
@@ -47,3 +47,28 @@ This project fulfills the laboratory and project requirements for the **Database
 ---
 
 ## 📂 Project Folder Structure
+```
+supply_chain_tracker/
+│
+├── app.py                    # Main Flask application entry point
+├── .env                      # Environment variables (DB password, secret key)
+├── .gitignore                # Files/folders excluded from Git control
+├── requirements.txt          # Python package dependency list
+│
+├── database/
+│   ├── schema.sql            # Core DDL statements (Table creations)
+│   ├── sample_data.sql       # Initial mock testing records
+│   └── procedures.sql        # Highly optimized Views, Procedures, and Triggers
+│
+├── templates/                # Jinja2 HTML layout components
+│   ├── base.html             # Master navigation and skeleton view
+│   ├── index.html            # Metrics Dashboard
+│   ├── stock.html            # Inventory stock tracking table
+│   ├── products.html         # Product addition & ledger view
+│   ├── suppliers.html        # Vendor management panel
+│   ├── orders.html           # Purchase order placement form
+│   └── low_stock.html        # Targeted shortage alerts interface
+│
+└── static/
+    └── css/
+        └── style.css         # Custom responsive UI styling
