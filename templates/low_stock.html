@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Low Stock Alerts{% endblock %}
+{% block content %}
+
+<h1 class="page-title">⚠️ Low Stock Alerts</h1>
+
+{% if alerts %}
+<p class="warning-banner">{{ alerts|length }} product(s) are below reorder level. Place purchase orders immediately.</p>
+<table class="data-table">
+    <thead>
+        <tr>
+            <th>Product</th><th>Category</th><th>Warehouse</th>
+            <th>Current Stock</th><th>Reorder Level</th><th>Shortage</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for a in alerts %}
+        <tr class="row-danger">
+            <td>{{ a.product_name }}</td>
+            <td>{{ a.category }}</td>
+            <td>{{ a.warehouse_name }}</td>
+            <td><strong>{{ a.current_stock }}</strong></td>
+            <td>{{ a.reorder_level }}</td>
+            <td><span class="badge badge-red">-{{ a.shortage }}</span></td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p class="success-banner">✅ All products are sufficiently stocked!</p>
+{% endif %}
+
+{% endblock %}

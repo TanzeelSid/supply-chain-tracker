@@ -1,0 +1,190 @@
+{% extends "base.html" %}
+{% block title %}Products{% endblock %}
+{% block content %}
+
+<div class="page-header">
+    <h1 class="page-title">🏷️ Products</h1>
+    <button class="btn btn-primary" onclick="toggleForm('addProductForm')">+ Add Product</button>
+</div>
+
+<!-- ============================================
+     ADD PRODUCT FORM (hidden by default)
+     Shown/hidden by toggleForm() in main.js
+     ============================================ -->
+<div id="addProductForm" class="form-card" style="display:none;">
+    <h2>Add New Product</h2>
+    <form method="POST" action="/products">
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="name">Product Name <span class="required">*</span></label>
+                <input type="text" id="name" name="name"
+                       placeholder="e.g. USB-C Cable 1m" required maxlength="100">
+            </div>
+            <div class="form-group">
+                <label for="category">Category <span class="required">*</span></label>
+                <select id="category" name="category" required>
+                    <option value="" disabled selected>Select category</option>
+                    <option value="Electronics">Electronics</option>
+                    <option value="Stationery">Stationery</option>
+                    <option value="Packaging">Packaging</option>
+                    <option value="Hardware">Hardware</option>
+                    <option value="Furniture">Furniture</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="unit_price">Unit Price (Rs.) <span class="required">*</span></label>
+                <input type="number" id="unit_price" name="unit_price"
+                       step="0.01" min="0.01" placeholder="e.g. 250.00" required>
+            </div>
+            <div class="form-group">
+                <label for="unit_of_measure">Unit of Measure</label>
+                <select id="unit_of_measure" name="unit_of_measure">
+                    <option value="pcs">pcs (pieces)</option>
+                    <option value="box">box</option>
+                    <option value="roll">roll</option>
+                    <option value="ream">ream</option>
+                    <option value="kg">kg</option>
+                    <option value="litre">litre</option>
+                    <option value="units" selected>units</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="reorder_level">Reorder Level <span class="required">*</span></label>
+                <input type="number" id="reorder_level" name="reorder_level"
+                       min="1" placeholder="e.g. 20" required>
+                <span class="field-hint">Alert fires when stock drops below this number</span>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">✔ Save Product</button>
+            <button type="button" class="btn btn-secondary"
+                    onclick="toggleForm('addProductForm')">✖ Cancel</button>
+        </div>
+    </form>
+</div>
+
+<!-- ============================================
+     SEARCH / FILTER BAR
+     Filters the table client-side via main.js
+     ============================================ -->
+<div class="toolbar">
+    <input type="text" id="productSearch"
+           class="search-input" placeholder="🔍 Search products..."
+           oninput="filterTable('productSearch', 'productsTable')">
+
+    <select id="categoryFilter" class="filter-select"
+            onchange="filterByCategory()">
+        <option value="">All Categories</option>
+        <option value="Electronics">Electronics</option>
+        <option value="Stationery">Stationery</option>
+        <option value="Packaging">Packaging</option>
+        <option value="Hardware">Hardware</option>
+        <option value="Furniture">Furniture</option>
+        <option value="Other">Other</option>
+    </select>
+
+    <span class="record-count" id="productCount">
+        {{ products|length }} product(s)
+    </span>
+</div>
+
+<!-- ============================================
+     PRODUCTS TABLE
+     ============================================ -->
+{% if products %}
+<div class="table-wrapper">
+    <table class="data-table" id="productsTable">
+        <thead>
+            <tr>
+                <th onclick="sortTable('productsTable', 0)" class="sortable">
+                    ID <span class="sort-icon">⇅</span>
+                </th>
+                <th onclick="sortTable('productsTable', 1)" class="sortable">
+                    Name <span class="sort-icon">⇅</span>
+                </th>
+                <th onclick="sortTable('productsTable', 2)" class="sortable">
+                    Category <span class="sort-icon">⇅</span>
+                </th>
+                <th onclick="sortTable('productsTable', 3)" class="sortable">
+                    Unit Price <span class="sort-icon">⇅</span>
+                </th>
+                <th>UOM</th>
+                <th onclick="sortTable('productsTable', 5)" class="sortable">
+                    Reorder Level <span class="sort-icon">⇅</span>
+                </th>
+                <th>Added On</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for p in products %}
+            <tr data-category="{{ p.category }}">
+                <td class="id-cell">#{{ p.product_id }}</td>
+                <td>
+                    <span class="product-name">{{ p.name }}</span>
+                </td>
+                <td>
+                    <span class="badge badge-{{
+                        'blue'   if p.category == 'Electronics' else
+                        'purple' if p.category == 'Stationery'  else
+                        'orange' if p.category == 'Packaging'   else
+                        'grey'
+                    }}">{{ p.category }}</span>
+                </td>
+                <td class="price-cell">Rs. {{ "%.2f"|format(p.unit_price) }}</td>
+                <td>{{ p.unit_of_measure }}</td>
+                <td>
+                    <span class="reorder-badge">{{ p.reorder_level }}</span>
+                </td>
+                <td class="date-cell">
+                    {{ p.created_at.strftime('%d %b %Y') if p.created_at else '—' }}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% else %}
+<!-- Empty State -->
+<div class="empty-state">
+    <div class="empty-icon">📭</div>
+    <p>No products found.</p>
+    <button class="btn btn-primary" onclick="toggleForm('addProductForm')">
+        + Add Your First Product
+    </button>
+</div>
+{% endif %}
+
+<!-- ============================================
+     CATEGORY SUMMARY CARDS (below the table)
+     Shows count per category
+     ============================================ -->
+<h2 class="section-title">📊 Products by Category</h2>
+<div class="cards-grid">
+    {% set categories = products | map(attribute='category') | list %}
+
+    {% for cat, icon, color in [
+        ('Electronics', '⚡', 'blue'),
+        ('Stationery',  '✏️', 'purple'),
+        ('Packaging',   '📦', 'orange'),
+        ('Hardware',    '🔧', 'green'),
+        ('Other',       '🗂️', 'grey')
+    ] %}
+    {% set count = products | selectattr('category', 'equalto', cat) | list | length %}
+    {% if count > 0 %}
+    <div class="card card-{{ color }}">
+        <div class="card-icon">{{ icon }}</div>
+        <div class="card-value">{{ count }}</div>
+        <div class="card-label">{{ cat }}</div>
+    </div>
+    {% endif %}
+    {% endfor %}
+</div>
+
+{% endblock %}

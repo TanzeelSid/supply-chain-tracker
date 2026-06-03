@@ -1,0 +1,222 @@
+{% extends "base.html" %}
+{% block title %}Suppliers{% endblock %}
+{% block content %}
+
+<div class="page-header">
+    <h1 class="page-title">🏭 Suppliers</h1>
+    <button class="btn btn-primary" onclick="toggleForm('addSupplierForm')">+ Add Supplier</button>
+</div>
+
+<!-- ============================================
+     ADD SUPPLIER FORM (hidden by default)
+     ============================================ -->
+<div id="addSupplierForm" class="form-card" style="display:none;">
+    <h2>Add New Supplier</h2>
+    <form method="POST" action="/suppliers">
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="name">Company Name <span class="required">*</span></label>
+                <input type="text" id="name" name="name"
+                       placeholder="e.g. TechParts Ltd" required maxlength="100">
+            </div>
+            <div class="form-group">
+                <label for="city">City <span class="required">*</span></label>
+                <select id="city" name="city" required>
+                    <option value="" disabled selected>Select city</option>
+                    <option value="Karachi">Karachi</option>
+                    <option value="Lahore">Lahore</option>
+                    <option value="Islamabad">Islamabad</option>
+                    <option value="Rawalpindi">Rawalpindi</option>
+                    <option value="Peshawar">Peshawar</option>
+                    <option value="Quetta">Quetta</option>
+                    <option value="Faisalabad">Faisalabad</option>
+                    <option value="Multan">Multan</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="contact_phone">Contact Phone</label>
+                <input type="text" id="contact_phone" name="contact_phone"
+                       placeholder="e.g. 0300-1234567" maxlength="20">
+            </div>
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" name="email"
+                       placeholder="e.g. contact@company.pk" maxlength="150">
+            </div>
+            <div class="form-group">
+                <label for="rating">Supplier Rating</label>
+                <select id="rating" name="rating">
+                    <option value="5.0">⭐⭐⭐⭐⭐ — 5.0 (Excellent)</option>
+                    <option value="4.5">⭐⭐⭐⭐½ — 4.5 (Very Good)</option>
+                    <option value="4.0" selected>⭐⭐⭐⭐  — 4.0 (Good)</option>
+                    <option value="3.5">⭐⭐⭐½  — 3.5 (Average)</option>
+                    <option value="3.0">⭐⭐⭐   — 3.0 (Fair)</option>
+                    <option value="2.0">⭐⭐     — 2.0 (Poor)</option>
+                    <option value="1.0">⭐       — 1.0 (Very Poor)</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">✔ Save Supplier</button>
+            <button type="button" class="btn btn-secondary"
+                    onclick="toggleForm('addSupplierForm')">✖ Cancel</button>
+        </div>
+    </form>
+</div>
+
+<!-- ============================================
+     SEARCH / FILTER BAR
+     ============================================ -->
+<div class="toolbar">
+    <input type="text" id="supplierSearch"
+           class="search-input" placeholder="🔍 Search suppliers..."
+           oninput="filterTable('supplierSearch', 'suppliersTable')">
+
+    <select id="cityFilter" class="filter-select"
+            onchange="filterSupplierByCity()">
+        <option value="">All Cities</option>
+        <option value="Karachi">Karachi</option>
+        <option value="Lahore">Lahore</option>
+        <option value="Islamabad">Islamabad</option>
+        <option value="Peshawar">Peshawar</option>
+        <option value="Other">Other</option>
+    </select>
+
+    <span class="record-count" id="supplierCount">
+        {{ suppliers|length }} supplier(s)
+    </span>
+</div>
+
+<!-- ============================================
+     SUPPLIERS TABLE
+     ============================================ -->
+{% if suppliers %}
+<div class="table-wrapper">
+    <table class="data-table" id="suppliersTable">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th onclick="sortTable('suppliersTable', 1)" class="sortable">
+                    Company Name <span class="sort-icon">⇅</span>
+                </th>
+                <th>Phone</th>
+                <th>Email</th>
+                <th onclick="sortTable('suppliersTable', 4)" class="sortable">
+                    City <span class="sort-icon">⇅</span>
+                </th>
+                <th>Country</th>
+                <th onclick="sortTable('suppliersTable', 6)" class="sortable">
+                    Rating <span class="sort-icon">⇅</span>
+                </th>
+                <th>Added On</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for s in suppliers %}
+            <tr data-city="{{ s.city }}">
+                <td class="id-cell">#{{ s.supplier_id }}</td>
+                <td>
+                    <span class="supplier-name">{{ s.name }}</span>
+                </td>
+                <td>
+                    {% if s.contact_phone %}
+                        <a href="tel:{{ s.contact_phone }}" class="contact-link">
+                            📞 {{ s.contact_phone }}
+                        </a>
+                    {% else %}
+                        <span class="na-text">—</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if s.email %}
+                        <a href="mailto:{{ s.email }}" class="contact-link">
+                            ✉ {{ s.email }}
+                        </a>
+                    {% else %}
+                        <span class="na-text">—</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <span class="badge badge-{{
+                        'blue'   if s.city == 'Karachi'   else
+                        'green'  if s.city == 'Lahore'    else
+                        'purple' if s.city == 'Islamabad' else
+                        'grey'
+                    }}">{{ s.city }}</span>
+                </td>
+                <td>{{ s.country if s.country else 'Pakistan' }}</td>
+                <td>
+                    {% if s.rating %}
+                        <div class="rating-display"
+                             title="Rating: {{ s.rating }}/5.0">
+                            <span class="rating-stars">
+                                {% set full = s.rating | int %}
+                                {% for i in range(full) %}⭐{% endfor %}
+                            </span>
+                            <span class="rating-number
+                                {{ 'rating-high'   if s.rating >= 4.0 else
+                                   'rating-medium' if s.rating >= 3.0 else
+                                   'rating-low' }}">
+                                {{ s.rating }}
+                            </span>
+                        </div>
+                    {% else %}
+                        <span class="na-text">Not rated</span>
+                    {% endif %}
+                </td>
+                <td class="date-cell">
+                    {{ s.created_at.strftime('%d %b %Y') if s.created_at else '—' }}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% else %}
+<div class="empty-state">
+    <div class="empty-icon">🏭</div>
+    <p>No suppliers added yet.</p>
+    <button class="btn btn-primary" onclick="toggleForm('addSupplierForm')">
+        + Add Your First Supplier
+    </button>
+</div>
+{% endif %}
+
+<!-- ============================================
+     SUPPLIER STATS CARDS
+     ============================================ -->
+<h2 class="section-title">📊 Supplier Overview</h2>
+<div class="cards-grid">
+    <div class="card card-blue">
+        <div class="card-icon">🏭</div>
+        <div class="card-value">{{ suppliers|length }}</div>
+        <div class="card-label">Total Suppliers</div>
+    </div>
+
+    {% set top_rated = suppliers | selectattr('rating') |
+       sort(attribute='rating', reverse=True) | first %}
+    {% if top_rated %}
+    <div class="card card-green">
+        <div class="card-icon">⭐</div>
+        <div class="card-value">{{ top_rated.rating }}</div>
+        <div class="card-label">Top Rating ({{ top_rated.name }})</div>
+    </div>
+    {% endif %}
+
+    <div class="card card-purple">
+        <div class="card-icon">🏙️</div>
+        <div class="card-value">
+            {{ suppliers | map(attribute='city') | unique | list | length }}
+        </div>
+        <div class="card-label">Cities Covered</div>
+    </div>
+</div>
+
+{% endblock %}

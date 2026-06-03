@@ -1,0 +1,220 @@
+{% extends "base.html" %}
+{% block title %}Shipments{% endblock %}
+{% block content %}
+
+<div class="page-header">
+    <h1 class="page-title">🚚 Shipments</h1>
+    <!-- Count badges for each status -->
+    <div class="status-summary">
+        {% set in_transit = shipments | selectattr('status', 'equalto', 'In Transit') | list | length %}
+        {% set delivered  = shipments | selectattr('status', 'equalto', 'Delivered')  | list | length %}
+        {% set delayed    = shipments | selectattr('status', 'equalto', 'Delayed')    | list | length %}
+        {% set cancelled  = shipments | selectattr('status', 'equalto', 'Cancelled')  | list | length %}
+
+        {% if in_transit > 0 %}
+        <span class="status-pill pill-blue"  onclick="filterShipmentStatus('In Transit')">
+            🚛 In Transit: {{ in_transit }}
+        </span>
+        {% endif %}
+        {% if delivered > 0 %}
+        <span class="status-pill pill-green" onclick="filterShipmentStatus('Delivered')">
+            ✅ Delivered: {{ delivered }}
+        </span>
+        {% endif %}
+        {% if delayed > 0 %}
+        <span class="status-pill pill-orange" onclick="filterShipmentStatus('Delayed')">
+            ⏳ Delayed: {{ delayed }}
+        </span>
+        {% endif %}
+        {% if cancelled > 0 %}
+        <span class="status-pill pill-red"   onclick="filterShipmentStatus('Cancelled')">
+            ❌ Cancelled: {{ cancelled }}
+        </span>
+        {% endif %}
+        <span class="status-pill pill-grey" onclick="filterShipmentStatus('')">
+            🔄 Show All
+        </span>
+    </div>
+</div>
+
+<!-- ============================================
+     SEARCH BAR
+     ============================================ -->
+<div class="toolbar">
+    <input type="text" id="shipmentSearch"
+           class="search-input" placeholder="🔍 Search by product, supplier, carrier..."
+           oninput="filterTable('shipmentSearch', 'shipmentsTable')">
+
+    <span class="record-count" id="shipmentCount">
+        {{ shipments|length }} shipment(s)
+    </span>
+</div>
+
+<!-- ============================================
+     SHIPMENTS TABLE
+     ============================================ -->
+{% if shipments %}
+<div class="table-wrapper">
+    <table class="data-table" id="shipmentsTable">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Product</th>
+                <th>Supplier</th>
+                <th>Warehouse</th>
+                <th>Qty</th>
+                <th>Carrier</th>
+                <th>Tracking No.</th>
+                <th onclick="sortTable('shipmentsTable', 7)" class="sortable">
+                    Shipped <span class="sort-icon">⇅</span>
+                </th>
+                <th onclick="sortTable('shipmentsTable', 8)" class="sortable">
+                    Received <span class="sort-icon">⇅</span>
+                </th>
+                <th>Status</th>
+                <th>Days in Transit</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for sh in shipments %}
+            <tr data-status="{{ sh.status }}">
+                <td class="id-cell">#{{ sh.shipment_id }}</td>
+                <td>
+                    <span class="product-name">{{ sh.product_name }}</span>
+                </td>
+                <td>{{ sh.supplier_name }}</td>
+                <td>
+                    <span class="warehouse-tag">{{ sh.warehouse_name }}</span>
+                </td>
+                <td><strong>{{ sh.quantity }}</strong></td>
+                <td>
+                    {% if sh.carrier_name %}
+                        🚚 {{ sh.carrier_name }}
+                    {% else %}
+                        <span class="na-text">—</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if sh.tracking_no %}
+                        <span class="tracking-no">{{ sh.tracking_no }}</span>
+                    {% else %}
+                        <span class="na-text">—</span>
+                    {% endif %}
+                </td>
+                <td class="date-cell">
+                    {% if sh.shipped_date %}
+                        {{ sh.shipped_date.strftime('%d %b %Y')
+                           if sh.shipped_date.__class__.__name__ != 'str'
+                           else sh.shipped_date }}
+                    {% else %}
+                        <span class="na-text">Not shipped</span>
+                    {% endif %}
+                </td>
+                <td class="date-cell">
+                    {% if sh.received_date %}
+                        {{ sh.received_date.strftime('%d %b %Y')
+                           if sh.received_date.__class__.__name__ != 'str'
+                           else sh.received_date }}
+                    {% else %}
+                        <span class="na-text pending-text">Pending</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <span class="badge badge-{{
+                        'green'  if sh.status == 'Delivered'  else
+                        'blue'   if sh.status == 'In Transit' else
+                        'orange' if sh.status == 'Delayed'    else
+                        'red'
+                    }}">
+                        {{
+                            '✅ Delivered'  if sh.status == 'Delivered'  else
+                            '🚛 In Transit' if sh.status == 'In Transit' else
+                            '⏳ Delayed'    if sh.status == 'Delayed'    else
+                            '❌ Cancelled'
+                        }}
+                    </span>
+                </td>
+                <td>
+                    {% if sh.shipped_date and sh.received_date %}
+                        {# Calculate days: received - shipped #}
+                        {% set shipped  = sh.shipped_date  if sh.shipped_date.__class__.__name__  != 'str' else None %}
+                        {% set received = sh.received_date if sh.received_date.__class__.__name__ != 'str' else None %}
+                        {% if shipped and received %}
+                            {% set diff = (received - shipped).days %}
+                            <span class="days-badge
+                                {{ 'days-fast' if diff <= 5 else
+                                   'days-normal' if diff <= 10 else
+                                   'days-slow' }}">
+                                {{ diff }} day{{ 's' if diff != 1 }}
+                            </span>
+                        {% else %}
+                            <span class="na-text">—</span>
+                        {% endif %}
+                    {% elif sh.status == 'In Transit' %}
+                        <span class="na-text pending-text">In progress</span>
+                    {% else %}
+                        <span class="na-text">—</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% else %}
+<div class="empty-state">
+    <div class="empty-icon">🚚</div>
+    <p>No shipments recorded yet.</p>
+    <p class="empty-sub">Shipments are created when a Purchase Order is dispatched.</p>
+</div>
+{% endif %}
+
+<!-- ============================================
+     SHIPMENT STATUS SUMMARY CARDS
+     ============================================ -->
+<h2 class="section-title">📊 Shipment Overview</h2>
+<div class="cards-grid">
+    <div class="card card-blue">
+        <div class="card-icon">📦</div>
+        <div class="card-value">{{ shipments|length }}</div>
+        <div class="card-label">Total Shipments</div>
+    </div>
+    <div class="card card-orange">
+        <div class="card-icon">🚛</div>
+        <div class="card-value">
+            {{ shipments | selectattr('status', 'equalto', 'In Transit') | list | length }}
+        </div>
+        <div class="card-label">In Transit</div>
+    </div>
+    <div class="card card-green">
+        <div class="card-icon">✅</div>
+        <div class="card-value">
+            {{ shipments | selectattr('status', 'equalto', 'Delivered') | list | length }}
+        </div>
+        <div class="card-label">Delivered</div>
+    </div>
+    <div class="card card-red">
+        <div class="card-icon">⏳</div>
+        <div class="card-value">
+            {{ shipments | selectattr('status', 'equalto', 'Delayed') | list | length }}
+        </div>
+        <div class="card-label">Delayed</div>
+    </div>
+</div>
+
+<!-- ============================================
+     CARRIERS USED — mini summary
+     ============================================ -->
+{% set carriers = shipments | map(attribute='carrier_name') |
+   select | unique | list %}
+{% if carriers %}
+<div class="info-box">
+    <strong>📬 Carriers used:</strong>
+    {% for c in carriers %}
+        <span class="inline-tag">{{ c }}</span>{% if not loop.last %}, {% endif %}
+    {% endfor %}
+</div>
+{% endif %}
+
+{% endblock %}
