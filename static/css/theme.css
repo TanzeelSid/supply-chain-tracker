@@ -1,0 +1,205 @@
+/* ================================================================
+   theme.css — Day / Night Theme + 3D Background Styles
+   Load this AFTER style.css in base.html
+   ================================================================ */
+
+/* ================================================================
+   LIGHT THEME (DAY MODE) — Variable Overrides
+   Activated when <html data-theme="light">
+   Dark theme (defaults in style.css) = NIGHT MODE
+   ================================================================ */
+html[data-theme="light"] {
+  --bg-dark:        #eef3fa;
+  --bg-panel:       #ffffff;
+  --bg-card:        #ffffff;
+  --bg-card-hover:  #f3f7fc;
+  --bg-input:       #ffffff;
+
+  --cyan:           #0089b8;
+  --cyan-dim:       #007096;
+  --emerald:        #00946a;
+  --emerald-dim:    #007a56;
+  --violet:         #6d4fc9;
+  --violet-dim:     #5a3eb0;
+  --amber:          #c5760a;
+  --amber-dim:      #a35f06;
+  --rose:           #d4264f;
+  --rose-dim:       #b01040;
+  --blue:           #1d5fd6;
+  --blue-dim:       #1648ad;
+
+  --text-primary:   #1b2737;
+  --text-secondary: #51627a;
+  --text-muted:     #8b9bb2;
+  --text-heading:   #0c1a2c;
+
+  --border:         rgba(13, 71, 110, 0.12);
+  --border-hover:   rgba(13, 71, 110, 0.28);
+  --border-glow:    rgba(0, 137, 184, 0.4);
+
+  --shadow-card:    0 8px 28px rgba(20, 50, 90, 0.10);
+  --glow-cyan:      0 0 18px rgba(0, 137, 184, 0.18);
+  --glow-emerald:   0 0 18px rgba(0, 148, 106, 0.18);
+  --glow-violet:    0 0 18px rgba(109, 79, 201, 0.18);
+  --glow-rose:      0 0 18px rgba(212, 38, 79, 0.18);
+
+  --grad-nav:       linear-gradient(90deg, #ffffff, #f3f7fc, #ffffff);
+}
+
+/* Animated mesh background — light mode version */
+html[data-theme="light"] body::before {
+  background:
+    radial-gradient(ellipse 80% 50% at 10% 20%, rgba(0, 137, 184, 0.07) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 40% at 90% 80%, rgba(109, 79, 201, 0.06) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 60% at 50% 50%, rgba(0, 148, 106, 0.04) 0%, transparent 70%);
+}
+
+/* Dot grid overlay — light mode version */
+html[data-theme="light"] body::after {
+  background-image: radial-gradient(circle, rgba(13, 71, 110, 0.08) 1px, transparent 1px);
+}
+
+/* ================================================================
+   SMOOTH GLOBAL CROSSFADE
+   Every element gently fades colors when the theme switches,
+   instead of an abrupt flash.
+   ================================================================ */
+body, .navbar, .card, .data-table, .data-table th, .data-table td,
+.form-card, .toolbar, .table-wrapper, .footer, .badge, .btn,
+.search-input, .filter-select, .empty-state, .status-pill,
+.warning-banner, .success-banner, .info-box {
+  transition:
+    background-color 0.6s ease,
+    border-color 0.6s ease,
+    color 0.6s ease,
+    box-shadow 0.6s ease;
+}
+
+/* ================================================================
+   3D BACKGROUND CANVAS
+   Sits fixed behind all page content, transparent so the
+   existing mesh/dot-grid background still shows through.
+   ================================================================ */
+#bg3d {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.6;
+  transition: opacity 0.8s ease;
+}
+
+/* Slightly dimmer in light mode so boxes don't overpower bright UI */
+html[data-theme="light"] #bg3d {
+  opacity: 0.35;
+}
+
+/* Make sure real content always paints above the 3D canvas */
+.navbar, .container, .footer {
+  position: relative;
+  z-index: 1;
+}
+
+/* ================================================================
+   DAY / NIGHT TOGGLE SWITCH
+   A pill-shaped switch with a sliding thumb, placed in the navbar.
+   ================================================================ */
+.theme-toggle {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  margin-left: 0.6rem;
+}
+
+.theme-toggle-track {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  width: 60px;
+  height: 30px;
+  border-radius: 18px;
+  background: linear-gradient(135deg, #0c1a2c, #050d1a);
+  border: 1px solid var(--border);
+  overflow: hidden;
+  transition: background 0.6s ease, border-color 0.6s ease;
+}
+
+html[data-theme="light"] .theme-toggle-track {
+  background: linear-gradient(135deg, #9fd6ff, #6fb9f2);
+}
+
+/* Tiny stars — visible only in night mode */
+.theme-toggle-track::before,
+.theme-toggle-track::after {
+  content: '';
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  border-radius: 50%;
+  background: #ffffff;
+  opacity: 0.8;
+  transition: opacity 0.5s ease;
+}
+
+.theme-toggle-track::before { top: 7px;  left: 38px; }
+.theme-toggle-track::after  { top: 18px; left: 30px; }
+
+html[data-theme="light"] .theme-toggle-track::before,
+html[data-theme="light"] .theme-toggle-track::after {
+  opacity: 0;
+}
+
+.theme-toggle-thumb {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, #1d2c47, #050d1a);
+  box-shadow: 0 0 10px rgba(0, 212, 255, 0.45);
+  transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55),
+              background 0.5s ease,
+              box-shadow 0.5s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  line-height: 1;
+}
+
+html[data-theme="light"] .theme-toggle-thumb {
+  transform: translateX(30px);
+  background: radial-gradient(circle at 30% 30%, #fff3c4, #ffc94d);
+  box-shadow: 0 0 12px rgba(255, 196, 60, 0.6);
+}
+
+/* Icon swap inside the thumb */
+.theme-toggle-thumb .icon-moon { display: inline; }
+.theme-toggle-thumb .icon-sun  { display: none; }
+
+html[data-theme="light"] .theme-toggle-thumb .icon-moon { display: none; }
+html[data-theme="light"] .theme-toggle-thumb .icon-sun  { display: inline; }
+
+.theme-toggle:hover .theme-toggle-thumb {
+  box-shadow: 0 0 16px rgba(0, 212, 255, 0.65);
+}
+
+html[data-theme="light"] .theme-toggle:hover .theme-toggle-thumb {
+  box-shadow: 0 0 18px rgba(255, 196, 60, 0.8);
+}
+
+/* ================================================================
+   RESPONSIVE — keep the toggle usable on small screens
+   ================================================================ */
+@media (max-width: 768px) {
+  .theme-toggle-track { width: 50px; height: 26px; }
+  .theme-toggle-thumb  { width: 20px; height: 20px; font-size: 10px; }
+  html[data-theme="light"] .theme-toggle-thumb { transform: translateX(25px); }
+}

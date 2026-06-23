@@ -5,9 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Supply Chain Tracker - {% block title %}{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/theme.css') }}">
 </head>
 <body>
-
+<canvas id="bg3d"></canvas>
     <!-- NAVIGATION BAR -->
     <nav class="navbar">
         <div class="nav-brand">📦 SupplyChain Tracker</div>
@@ -20,6 +21,14 @@
             <li><a href="{{ url_for('shipments') }}">Shipments</a></li>
             <li><a href="{{ url_for('low_stock') }}" class="alert-link">⚠️ Low Stock</a></li>
         </ul>
+        <button id="themeToggle" class="theme-toggle" aria-label="Toggle day/night theme">
+    <span class="theme-toggle-track">
+        <span class="theme-toggle-thumb">
+            <span class="icon-moon">🌙</span>
+            <span class="icon-sun">☀️</span>
+        </span>
+    </span>
+</button>
     </nav>
 
     <!-- FLASH MESSAGES -->
@@ -41,5 +50,7 @@
     </footer>
 
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="{{ url_for('static', filename='js/theme-3d.js') }}"></script>
 </body>
 </html>
