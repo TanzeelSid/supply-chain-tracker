@@ -78,7 +78,7 @@ Make sure the following are installed on your Ubuntu system before running the p
 ### Step 1 — Clone the Repository
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/supply-chain-tracker.git
+git clone https://github.com/TanzeelSid/supply-chain-tracker.git
 cd supply-chain-tracker
 ```
 
@@ -449,6 +449,7 @@ git push
 | Name | Role | Student ID |
 |---|---|---|
 | Muhammad Tanzeel Siddique | Database Design + Backend | CS241280 |
+| Hussain Abbas | Database Design + Backend | CS241040 |
 | Haani Raza | Frontend + SQL Queries | CS241010 |
 | Azhan Nadeem Malik | Testing + Report | CS241201 |
 
